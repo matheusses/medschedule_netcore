@@ -1,0 +1,192 @@
+<div class="d-flex">
+  <div class="form-inline mr-auto">
+    <div class="form-group mb-2">
+      <input type="text" class="form-control mr-2" placeholder="Search" [(ngModel)]="listFilter" />
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-outline-primary" (click)="newMeeting(template)">
+      New Meeting
+    </button>
+  </div>
+</div>
+
+<h4>Search: {{listFilter}}</h4>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>
+        Patient
+      </th>
+      <th>
+        Birth
+      </th>
+      <th>
+        Begin
+      </th>
+      <th>
+        End
+      </th>
+      <th>
+        Observartion
+      </th>
+      <th>
+        Options
+      </th>
+    </tr>
+  </thead>
+  <tbody *ngIf="meetings">
+    <tr *ngFor="let item of meetingsFiltered">
+      <td>
+        {{item.patientName}}
+      </td>
+      <td>
+        {{item.birth | DateFormatPipe}}
+      </td>
+      <td>
+        {{item.beginMeeting | DateTimeFormatPipe}}
+      </td>
+      <td>
+        {{item.endMeeting | DateTimeFormatPipe}}
+      </td>
+      <td>
+        {{item.observation}}
+      </td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-sm btn-success" tooltip="Edit" (click)="editMeeting(item,template)">
+              Edit
+          </button>
+          <button class="btn btn-sm btn-danger" tooltip="Remove" (click)="deleteMeeting(item,confirm)">
+              Remove
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf="!meetings">
+    <tr>
+      <td colspan="5" class="text-center">
+        <h4>
+          Nothing...
+        </h4>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<div bsModal #template="bs-modal" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="dialog-sizes-name1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="dialog-sizes-name1" class="modal-title pull-left">Meeting</h4>
+        <button type="button" class="close pull-right" (click)="template.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="registerForm" validationContext="USER.REGISTRATION">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Patient</label>
+              <input type="text" formControlName="patientName" maxlength="50" class="form-control"
+                     [ngClass]="{'is-invalid':registerForm.get('patientName').errors
+                                                     && registerForm.get('patientName').touched}" />
+              <div class="invalid-feedback">
+                {{registerForm.get('patientName').errors?.required ? 'Required.' : ''}}
+                {{registerForm.get('patientName').errors?.serverError}}
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <label>Birth</label>
+              <input type="text" class="form-control"
+                     bsDatepicker
+                     value="{{birth | DateFormatPipe }}"
+                     [(ngModel)]="birth"
+                     [bsConfig]="{dateInputFormat : 'DD/MM/YYYY'}"
+                     [ngClass]="{'is-invalid':registerForm.get('birth').errors
+             && registerForm.get('birth').touched}"
+                     formControlName="birth">
+              <div class="invalid-feedback">
+                {{registerForm.get('birth').errors?.required ? 'Required.' : ''}}
+                {{registerForm.get('birth').errors?.serverError}}
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label>Begin</label>
+              <input type="text" class="form-control"
+                     bsDatepicker
+                     value="{{beginMeeting | DateTimeFormatPipe }}"
+                     [(ngModel)]="beginMeeting"
+                     [bsConfig]="{dateInputFormat : 'DD/MM/YYYY HH:mm'}"
+                     [ngClass]="{'is-invalid':registerForm.get('beginMeeting').errors
+             && registerForm.get('beginMeeting').touched}"
+                     formControlName="beginMeeting">
+              <div class="invalid-feedback">
+                {{registerForm.get('beginMeeting').errors?.required ? 'Required.' : ''}}
+                {{registerForm.get('beginMeeting').errors?.serverError}}
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <label>End</label>
+              <input type="text" class="form-control"
+                     bsDatepicker
+                     value="{{endMeeting | DateTimeFormatPipe }}"
+                     [(ngModel)]="endMeeting"
+                     [bsConfig]="{dateInputFormat : 'DD/MM/YYYY HH:mm'}"
+                     [ngClass]="{'is-invalid':registerForm.get('endMeeting').errors
+             && registerForm.get('endMeeting').touched}"
+                     formControlName="endMeeting">
+              <div class="invalid-feedback">
+                {{registerForm.get('endMeeting').errors?.serverError}}
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-8">
+              <label>Observation</label>
+              <input type="text" class="form-control" formControlName="observation">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer d-flex">
+        <button class="btn btn-secondary" (click)="template.hide()">
+          Close
+        </button>
+        <button class="btn btn-primary" [disabled]="!registerForm.valid" (click)="save(template)">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #confirm="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">
+          Meeting Remove
+        </h4>
+        <button type="button" class="close pull-right" (click)="confirm.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>{{messageDeleteMeetingConfirm}}</p>
+      </div>
+      <div class="modal-footer btn-group d-flex">
+        <button type="button" class="btn btn-outline-primary" (click)="confirm.hide()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-outline-danger" (click)="confirmDelete(confirm)">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
